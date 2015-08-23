@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace BinaryTree
 {
-    class Pyramid
+    public class Pyramid
     {
 
         public List<int> Ellements { get; set; } = new List<int>();
-        public int size
+        public int Size
         {
             get
             {
@@ -24,7 +24,7 @@ namespace BinaryTree
         {
             Ellements = list;
             BuildHeap();
-            heapSort();
+            HeapSort();
         }
         public void Heapify(int i)
         {
@@ -38,12 +38,12 @@ namespace BinaryTree
                 rightChild = 2 * i + 2;
                 largestChild = i;
 
-                if (leftChild < size && Ellements[leftChild] > Ellements[largestChild])
+                if (leftChild < Size && Ellements[leftChild] > Ellements[largestChild])
                 {
                     largestChild = leftChild;
                 }
 
-                if (rightChild < size && Ellements[rightChild] > Ellements[largestChild])
+                if (rightChild < Size && Ellements[rightChild] > Ellements[largestChild])
                 {
                     largestChild = rightChild;
                 }
@@ -61,15 +61,15 @@ namespace BinaryTree
         }
         public void BuildHeap() 
         {
-            for (int i = size / 2; i >= 0; i--)
+            for (int i = Size / 2; i >= 0; i--)
             {
                 Heapify(i); 
             }
         }
-        public void heapSort()
+        public void HeapSort()
         {
             //BuildHeap();
-            List<int> list = Ellements.GetRange(0,size);     
+            List<int> list = Ellements.GetRange(0,Size);     
             for (int i = 0; i < list.Count; i++)
             {
                 list[i] = GetMax();
@@ -80,14 +80,14 @@ namespace BinaryTree
         public int GetMax()
         {
             int result = Ellements[0];
-            Ellements[0] = Ellements[size - 1];
-            Ellements.RemoveAt(size - 1);
+            Ellements[0] = Ellements[Size - 1];
+            Ellements.RemoveAt(Size - 1);
             return result;
         }
-        public void add(int value)
+        public void Add(int value)
         {
             Ellements.Add(value);
-            int i = size - 1;
+            int i = Size - 1;
             int parent = (i - 1) / 2;
 
             while (i > 0 && Ellements[parent] < Ellements[i])
@@ -99,9 +99,9 @@ namespace BinaryTree
                 i = parent;
                 parent = (i - 1) / 2;
             }
-            heapSort();
+            HeapSort();
         }
-        public void Heap_Increase_Key(int index, int changing) 
+        public void HeapIncreaseKey(int index, int changing) 
         {
             Ellements[index] = changing;
             int nod = (index - 1) / 2; 
@@ -114,6 +114,35 @@ namespace BinaryTree
                 nod = (index - 1) / 2;
             }
             Heapify(index);
+        }
+        public void SplitTree(List<int> tree1, List<int> tree2, int node)
+        {                        
+            List<int> indexes = new List<int>();
+            GetSubTree(tree1,indexes, node);
+            for (int i = 0; i < Size; i++)
+            {
+                if (!indexes.Contains(i))
+                {
+                    tree2.Add(Ellements[i]);
+                }
+            }
+
+        }
+        public void GetSubTree(List<int> tree1, List<int> indexes,int node)
+        {
+            tree1.Add(Ellements[node]);
+            indexes.Add(node);
+           int leftChild = 2 * node + 1;
+           int rightChild = 2 * node + 2;
+            if (leftChild <= Size - 1)
+            {
+                GetSubTree(tree1, indexes, leftChild);
+            }
+            if (rightChild <= Size - 1)
+            {
+                GetSubTree(tree1, indexes, rightChild);
+            }
+            //  return answer;
         }
 
     }

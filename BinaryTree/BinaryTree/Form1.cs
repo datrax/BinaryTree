@@ -1,11 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 
@@ -14,18 +8,20 @@ namespace BinaryTree
     public partial class Form1 : Form
     {
         List<int> Ellements = new List<int>();
-        public Form1()
+            public Form1()
         {
             InitializeComponent();
             button1.Enabled = false;
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void BuildTree(object sender, EventArgs e)
         {
-            TreeViewer treeViewer = new TreeViewer(Ellements);
-            treeViewer.ShowDialog();
+            CanFillElements(textBox1.Text);// to prevent bug
+            TreeViewer treeViewer = new TreeViewer(Ellements.GetRange(0,Ellements.Count));
+            treeViewer.Owner = this;
+            treeViewer.Show();
         }
-        public bool TextIsValid(string text)
+        public bool CanFillElements(string text)
         {
 
             Ellements.Clear();
@@ -62,7 +58,7 @@ namespace BinaryTree
 
         private void GetText(object sender, EventArgs e)
         {
-            if (!TextIsValid(((TextBox)sender).Text))
+            if (!CanFillElements(((TextBox)sender).Text))
                 button1.Enabled = false;
             else
                 button1.Enabled = true;
@@ -76,7 +72,7 @@ namespace BinaryTree
                 using (StreamReader str = new StreamReader(openFileDialog1.FileName))
                 {
                     string s = str.ReadToEnd().Replace(';',' ').Replace('\n', ' ').Replace(',', ' ');
-                    if (!TextIsValid(s))
+                    if (!CanFillElements(s))
                     {
                         MessageBox.Show("File has wrong syntax! Acceptable seperators: \"space\" , \"enter\" , \";\" , \",\"!");
                         return;
