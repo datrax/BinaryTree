@@ -12,15 +12,14 @@ namespace BinaryTree
 {
     public partial class TreeViewer : Form
     {
-        public Pyramid pyramid;
-        public string CodeName;
+        public Treap treap;
         public TreeViewer()
         {
             InitializeComponent();
         }
-        public TreeViewer(List<int> list) : this()
+        public TreeViewer(int[] xItems, int[] yItems) : this()
         {
-            pyramid = new Pyramid(list);
+            treap = Treap.Treapify(xItems, yItems);
         }
         private void TreeViewer_Load(object sender, EventArgs e)
         {
@@ -29,45 +28,35 @@ namespace BinaryTree
 
         private void DrawTree(object sender, PaintEventArgs e)
         {
-            if (pyramid.Size == 0)
-            {
-                CodeName = "";
-                return;
-            }
-            int tear = 0;
-            int counter = 0;
-            int elWidth = 30;
-            int elHeight = 20;
-            bool noElementsLeft = false;
+            if (treap == null) return;
+            DrawTear(treap, 0, 0, pictureBox1.Width / 2.0F, e);
+
+        }
+
+        void DrawTear(Treap treap, int tear, float x, float delta, PaintEventArgs e)
+        {
             int tearWidth = 60;
-            Pen pen = new Pen(Color.FloralWhite, 1);
+            int horizontalCoef = 20;
+            int vertCoef = 20;
             Font font = new Font("Times New Roman", 15);
             Brush brush = new SolidBrush(Color.Black);
-            while (!noElementsLeft)
+            Pen pen = new Pen(Color.FloralWhite, 1);
+            float y = tear * tearWidth;
+            x += delta;
+            e.Graphics.DrawString(treap.x + "; " + treap.y, font, brush, x, y);
+            if (delta != 0)
             {
-                for (int i = 1; i <= Math.Pow(2, tear) && !noElementsLeft; i++)
-                {
-                    float x1 = (float)(i * pictureBox1.Width / (Math.Pow(2, tear) + 1));
-                    float y1 = tear * tearWidth;                    
-                    e.Graphics.DrawString(pyramid.Ellements[counter].ToString(), font, brush, x1, y1);
-                    if (tear != 0)
-                    {
-                        float x2 = (float)((Math.Round((i) / 2.0, MidpointRounding.AwayFromZero)) * pictureBox1.Width / (Math.Pow(2, tear - 1) + 1)) + elWidth / 2.0F;
-                        float y2 = (tear - 1) * tearWidth + elHeight;
-                        e.Graphics.DrawLine(pen, x1 + elWidth / 2.0F, y1, x2, y2);
+                e.Graphics.DrawLine(pen, x + horizontalCoef, y, x - delta + horizontalCoef, y - tearWidth + vertCoef);
+            }
 
-                    }
-                    if (++counter == pyramid.Size)
-                        noElementsLeft = true;
-                }
-                tear++;
-            }
-            string name = "";
-            foreach (int p in pyramid.Ellements)
-            {
-                name += p + " ";
-            }
-            CodeName = name;
+            delta = Math.Abs(delta) / 2F;
+
+
+            if (treap.Left != null)
+                DrawTear(treap.Left, tear + 1, x, -delta, e);
+            if (treap.Right != null)
+                DrawTear(treap.Right, tear + 1, x, +delta, e);
+
         }
 
         private void Redraw(object sender, EventArgs e)
@@ -75,57 +64,49 @@ namespace BinaryTree
             pictureBox1.Invalidate();
         }
 
-        private void SortPyramid(object sender, EventArgs e)
-        {
-            pyramid.HeapSort();
-            pictureBox1.Invalidate();
-        }
 
         private void AddItem(object sender, EventArgs e)
         {
-            int n;
-            if (!Int32.TryParse(textBox1.Text, out n))
+            int x, y;
+            if (!Int32.TryParse(textBox2.Text, out x))
             {
                 MessageBox.Show("Wrong number");
                 return;
             }
-            pyramid.Add(n);
-            pyramid.HeapSort();
+            if (!Int32.TryParse(textBox3.Text, out y))
+            {
+                MessageBox.Show("Wrong number");
+                return;
+            }
+            if (treap == null)
+                treap = new Treap();
+            treap = treap.Add(x, y);
             pictureBox1.Invalidate();
         }
 
-        private void DeleteTop(object sender, EventArgs e)
+        private void DeleteItem(object sender, EventArgs e)
         {
-            if (pyramid.Size == 0) return;
-            pyramid.GetMax();
-            pyramid.Heapify(0);
-            pyramid.HeapSort();
+            int x;
+            if (treap != null)
+            {
+                if (!Int32.TryParse(textBox1.Text, out x))
+                {
+                    MessageBox.Show("Wrong number");
+                    return;
+                }
+                try
+                {
+                    treap = treap.Remove(x);
+                }
+                catch (NullReferenceException)
+                {
+                    MessageBox.Show("There is no element witn index " + x);
+                }
+            }
             pictureBox1.Invalidate();
         }
 
-        private void ReplceItems(object sender, EventArgs e)
-        {
-            int n, t;
-            if (!Int32.TryParse(textBox2.Text, out n))
-            {
-                MessageBox.Show("Wrong number");
-                return;
-            }
-            if (!Int32.TryParse(textBox3.Text, out t))
-            {
-                MessageBox.Show("Wrong number");
-                return;
-            }
-            n = pyramid.Ellements.IndexOf(n);
-            if (n == -1)
-            {
-                MessageBox.Show("There is no such element");
-                return;
-            }
-            pyramid.HeapIncreaseKey(n, t);
-            pyramid.HeapSort();
-            pictureBox1.Invalidate();
-        }
+
 
         private void SplitTree(object sender, EventArgs e)
         {
@@ -135,32 +116,31 @@ namespace BinaryTree
                 MessageBox.Show("Wrong number");
                 return;
             }
-            n = pyramid.Ellements.IndexOf(n);
             if (n == -1)
             {
                 MessageBox.Show("There is no such element");
                 return;
             }
-            List<int> firstEllements = new List<int>();
-            List<int> secondEllements = new List<int>();
-            pyramid.SplitTree(firstEllements, secondEllements, n);
-            TreeViewer treeViewer = new TreeViewer(firstEllements);
-            treeViewer.Show();
-            TreeViewer treeViewer2 = new TreeViewer(secondEllements);
-            treeViewer2.Show();
+            Treap leftTree;
+            Treap rightTree;
+            TreeViewer treeViewer = new TreeViewer();
+
+            treap.Split(n, out leftTree, out rightTree);
+
+            treeViewer.treap = leftTree;
             treeViewer.Owner = this.Owner;
-            treeViewer2.Owner = this.Owner;
+            treeViewer.Show();
+            treeViewer.Text += " " + this.Owner.OwnedForms.Length;
+            TreeViewer treeViewer1 = new TreeViewer();
+            treeViewer1.treap = rightTree;
+            treeViewer1.Owner = this.Owner;
+            treeViewer1.Show();
+            treeViewer1.Text += " " + this.Owner.OwnedForms.Length;
         }
 
-        private void button6_Click(object sender, EventArgs e)
+        private void MergeTree(object sender, EventArgs e)
         {
-
-            ListBox lb = new ListBox();
-            foreach (TreeViewer form in this.Owner.OwnedForms)
-            {
-                lb.Items.Add(form.CodeName);
-            }
-            MergeForm mf = new MergeForm(lb);
+            MergeForm mf = new MergeForm();
             mf.Owner = this;
             mf.ShowDialog();
         }

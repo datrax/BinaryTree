@@ -7,8 +7,9 @@ namespace BinaryTree
 {
     public partial class Form1 : Form
     {
-        List<int> Ellements = new List<int>();
-            public Form1()
+        List<int> xItems = new List<int>();
+        List<int> yItems = new List<int>();
+        public Form1()
         {
             InitializeComponent();
             button1.Enabled = false;
@@ -16,53 +17,31 @@ namespace BinaryTree
 
         private void BuildTree(object sender, EventArgs e)
         {
-            CanFillElements(textBox1.Text);// to prevent bug
-            TreeViewer treeViewer = new TreeViewer(Ellements.GetRange(0,Ellements.Count));
+            TreeViewer treeViewer = new TreeViewer(xItems.ToArray(),yItems.ToArray());
             treeViewer.Owner = this;
+            treeViewer.Text += " "+OwnedForms.Length;
             treeViewer.Show();
         }
-        public bool CanFillElements(string text)
-        {
+       
 
-            Ellements.Clear();
-            int k;
-            int pos = 0;
-            do
+        private bool GetText(string s)
+        {
+            xItems.Clear();
+            yItems.Clear();
+            foreach (string line in s.Split('\n'))
+
             {
-                for (int i = pos; i < text.Length; i++)
+                int spacePos=line.IndexOf(" ");
+                int p, p1;
+                if (spacePos>0&&Int32.TryParse(line.Substring(0, spacePos), out p) && Int32.TryParse(line.Substring(spacePos), out p1))
                 {
-                    if (text[i] == ' ' || i == text.Length - 1)
-                    {
-                        if (int.TryParse(text.Substring(pos, i - pos + 1), out k))
-                        {
-                            Ellements.Add(k);
-                        }
-                        else
-                        {
-                            return false;
-                        }
-                        pos = i;
-                    }
+                    xItems.Add(p);
+                    yItems.Add(p1);
                 }
-                pos++;
-
-            } while (pos < text.Length);
-            if (Ellements.Count > 0) return true;
-            if (int.TryParse(text.Substring(0, text.Length), out k))
-            {
-                Ellements.Add(k);
-                return true;
+                else
+                    return false;
             }
-            return false;
-        }
-
-        private void GetText(object sender, EventArgs e)
-        {
-            if (!CanFillElements(((TextBox)sender).Text))
-                button1.Enabled = false;
-            else
-                button1.Enabled = true;
-                
+            return true;
         }
 
         private void ImportFromFile(object sender, EventArgs e)
@@ -71,8 +50,8 @@ namespace BinaryTree
             {
                 using (StreamReader str = new StreamReader(openFileDialog1.FileName))
                 {
-                    string s = str.ReadToEnd().Replace(';',' ').Replace('\n', ' ').Replace(',', ' ');
-                    if (!CanFillElements(s))
+                    string s = str.ReadToEnd().Replace(';',' ').Replace(',', ' ');
+                    if (!GetText(s))
                     {
                         MessageBox.Show("File has wrong syntax! Acceptable seperators: \"space\" , \"enter\" , \";\" , \",\"!");
                         return;
@@ -80,6 +59,14 @@ namespace BinaryTree
                     textBox1.Text = s;
                 }
             }
+        }
+
+        private void CheckText(object sender, EventArgs e)
+        {
+            if (GetText(textBox1.Text))
+            button1.Enabled = true;
+              else
+                  button1.Enabled = false; 
         }
     }
 }

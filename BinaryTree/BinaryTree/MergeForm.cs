@@ -14,35 +14,23 @@ namespace BinaryTree
     {
         public MergeForm()
         {
-            InitializeComponent();
+            InitializeComponent();        
         }
-        public MergeForm(ListBox listbox) : this()
-        {
-            foreach (var item in listbox.Items)
-                this.listBox1.Items.Add(item);
-        }
+
         private void Merge(object sender, EventArgs e)
         {
-            try {
-                Pyramid first = (this.Owner.Owner.OwnedForms[listBox1.SelectedIndex] as TreeViewer).pyramid;
-                List<int> firstEllements = first.Ellements.GetRange(0, first.Size );
-                Pyramid second = new Pyramid();
-                second.Ellements= (this.Owner as TreeViewer).pyramid.Ellements.GetRange(0, (this.Owner as TreeViewer).pyramid.Size);
+            TreeViewer treeViewer=new TreeViewer();
+            treeViewer.treap = Treap.Merge(((TreeViewer)this.Owner).treap, ((TreeViewer)this.Owner.Owner.OwnedForms[listBox1.SelectedIndex]).treap);
+            treeViewer.Owner = this.Owner.Owner;
+            treeViewer.Text += " " + this.Owner.Owner.OwnedForms.Length;
+            this.Close();
+            treeViewer.Show();
+        }
 
-                foreach (var i in firstEllements)
-                {
-                    second.Add(i);                    
-                }
-                TreeViewer treeViewer = new TreeViewer(second.Ellements);
-                treeViewer.Owner = this.Owner.Owner;
-                treeViewer.Show();
-                this.Close();
-            }
-            catch (IndexOutOfRangeException)
-            {
-                MessageBox.Show("Select the item");
-            }
-          
+        private void MergeForm_Load(object sender, EventArgs e)
+        {
+            foreach (var item in this.Owner.Owner.OwnedForms)
+                this.listBox1.Items.Add(item.Text);
         }
     }
 }

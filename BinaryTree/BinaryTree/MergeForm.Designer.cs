@@ -75,6 +75,7 @@
             this.Controls.Add(this.listBox1);
             this.Name = "MergeForm";
             this.Text = "MergeForm";
+            this.Load += new System.EventHandler(this.MergeForm_Load);
             this.ResumeLayout(false);
 
         }
